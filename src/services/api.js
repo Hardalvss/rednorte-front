@@ -47,6 +47,12 @@ export const getCitasPorPaciente = (id) => api.get(`/agenda/api/citas/paciente/$
 export const getCitasPorMedico = (id) => api.get(`/agenda/api/citas/medico/${id}`)
 export const agendarCita = (data) => api.post('/agenda/api/citas', data)
 export const cancelarCitaAgenda = (id) => api.patch(`/agenda/api/citas/${id}/cancelar`)
+export const confirmarCitaAgenda = (id) => api.patch(`/agenda/api/citas/${id}/confirmar`)
+export const atenderCitaAgenda = (id) => api.patch(`/agenda/api/citas/${id}/atender`)
+export const reprogramarCitaAgenda = (id, data) => api.patch(`/agenda/api/citas/${id}/reprogramar`, data)
+export const aceptarReprogramacionAgenda = (id) => api.patch(`/agenda/api/citas/${id}/aceptar-reprogramacion`)
+export const rechazarReprogramacionAgenda = (id) => api.patch(`/agenda/api/citas/${id}/rechazar-reprogramacion`)
+export const getCitasPendientesMedico = (id) => api.get(`/agenda/api/citas/medico/${id}/pendientes`)
 
 // ── HORAS MÉDICAS ─────────────────────────────────────
 export const getHorasDisponibles = (especialidad) =>
@@ -78,6 +84,23 @@ export const getSeguimientoEstado = (id) => api.get(`/api/seguimiento/${id}/esta
 export const crearSeguimiento = (data) => api.post('/api/seguimiento', data)
 export const registrarEvento = (id, data) => api.post(`/api/seguimiento/${id}/eventos`, data)
 export const actualizarEstadoSeguimiento = (id, data) => api.patch(`/api/seguimiento/${id}/estado`, data)
+
+// ── NOTIFICACIONES ────────────────────────────────────
+export const getNotificaciones = (rol, id) => api.get(`/agenda/api/notificaciones/${rol}/${id}`)
+export const getNotificacionesNoLeidas = (rol, id) => api.get(`/agenda/api/notificaciones/${rol}/${id}/no-leidas`)
+export const getContadorNotificaciones = (rol, id) => api.get(`/agenda/api/notificaciones/${rol}/${id}/contador`)
+export const marcarNotificacionLeida = (notifId) => api.patch(`/agenda/api/notificaciones/${notifId}/leer`)
+export const marcarTodasNotificacionesLeidas = (rol, id) => api.patch(`/agenda/api/notificaciones/${rol}/${id}/leer-todas`)
+
+// ── PLANTILLAS DE HORARIO ─────────────────────────────
+export const getPlantillas = () => api.get('/agenda/api/plantillas-horario')
+export const getPlantillasPorMedico = (medicoId) => api.get(`/agenda/api/plantillas-horario/medico/${medicoId}`)
+export const crearPlantilla = (data) => api.post('/agenda/api/plantillas-horario', data)
+export const actualizarPlantilla = (id, data) => api.put(`/agenda/api/plantillas-horario/${id}`, data)
+export const eliminarPlantilla = (id) => api.delete(`/agenda/api/plantillas-horario/${id}`)
+export const togglePlantilla = (id) => api.patch(`/agenda/api/plantillas-horario/${id}/toggle`)
+export const generarHorasPlantilla = (id) => api.post(`/agenda/api/plantillas-horario/${id}/generar`)
+export const upsertHorarioMedico = (data) => api.post('/agenda/api/horarios-medico', data)
 
 // ── ESPECIALIDADES ────────────────────────────────────
 export const getEspecialidades = () => api.get('/api/especialidades')

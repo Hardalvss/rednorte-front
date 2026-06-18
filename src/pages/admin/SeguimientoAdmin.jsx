@@ -50,12 +50,12 @@ export default function SeguimientoAdmin() {
 
   return (
     <Layout>
-      <div className="flex items-center justify-between mb-6">
+      <div className="page-header">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Seguimiento de Pacientes</h1>
+          <h1 className="page-title">Seguimiento de Pacientes</h1>
           <p className="text-gray-500 text-sm mt-1">{seguimientos.length} historiales</p>
         </div>
-        <button onClick={() => { setForm(EMPTY); setModalCrear(true) }} className="btn-primary">+ Nuevo Seguimiento</button>
+        <button onClick={() => { setForm(EMPTY); setModalCrear(true) }} className="btn-primary w-full sm:w-auto">+ Nuevo Seguimiento</button>
       </div>
 
       <div className="card">

@@ -95,12 +95,12 @@ export default function EspecialidadesAdmin() {
 
   return (
     <Layout>
-      <div className="flex items-center justify-between mb-6">
+      <div className="page-header">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Especialidades</h1>
+          <h1 className="page-title">Especialidades</h1>
           <p className="text-gray-500 text-sm mt-1">Gestiona las especialidades médicas y sus médicos asignados</p>
         </div>
-        <button onClick={abrirCrear} className="btn-primary flex items-center gap-2">
+        <button onClick={abrirCrear} className="btn-primary w-full sm:w-auto flex items-center justify-center gap-2">
           <Plus size={15} /> Nueva Especialidad
         </button>
       </div>

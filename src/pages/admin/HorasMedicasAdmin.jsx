@@ -34,12 +34,12 @@ export default function HorasMedicasAdmin() {
 
   return (
     <Layout>
-      <div className="flex items-center justify-between mb-6">
+      <div className="page-header">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Horas Médicas</h1>
+          <h1 className="page-title">Horas Médicas</h1>
           <p className="text-gray-500 text-sm mt-1">{horas.length} horas registradas</p>
         </div>
-        <button onClick={() => { setForm(EMPTY); setModal(true) }} className="btn-primary">+ Nueva Hora</button>
+        <button onClick={() => { setForm(EMPTY); setModal(true) }} className="btn-primary w-full sm:w-auto">+ Nueva Hora</button>
       </div>
 
       <div className="card">

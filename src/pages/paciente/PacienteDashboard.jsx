@@ -23,7 +23,7 @@ export default function PacienteDashboard() {
   return (
     <Layout>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-800">Bienvenido, {user?.nombre}</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Bienvenido, {user?.nombre}</h1>
         <p className="text-gray-500 mt-1">Este es tu panel de salud personal</p>
       </div>
 
@@ -55,12 +55,12 @@ export default function PacienteDashboard() {
         ) : (
           <div className="space-y-3">
             {citas.slice(0, 5).map(c => (
-              <div key={c.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div>
+              <div key={c.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 bg-gray-50 rounded-lg">
+                <div className="min-w-0">
                   <p className="font-medium text-gray-800">{c.horaMedica?.nombreMedico || '—'}</p>
                   <p className="text-sm text-gray-500">{c.horaMedica?.especialidad || '—'}</p>
                 </div>
-                <div className="text-right flex flex-col items-end gap-1">
+                <div className="text-left sm:text-right flex sm:flex-col items-start sm:items-end gap-2 sm:gap-1 shrink-0">
                   <p className="text-sm font-medium text-blue-600">
                     {c.horaMedica?.fechaHora ? new Date(c.horaMedica.fechaHora).toLocaleString('es-CL') : '—'}
                   </p>

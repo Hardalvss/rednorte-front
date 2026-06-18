@@ -98,7 +98,7 @@ export default function HorasMedico() {
   return (
     <Layout>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Mi Agenda</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Mi Agenda</h1>
         <p className="text-gray-500 text-sm mt-1">Gestiona tu disponibilidad diaria (7:00 – 18:00)</p>
       </div>
 

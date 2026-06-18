@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import { ToastProvider } from './context/ToastContext'
 import PrivateRoute from './components/PrivateRoute'
 import { ShieldOff } from 'lucide-react'
 
@@ -14,17 +15,15 @@ import ReprogramacionAdmin from './pages/admin/ReprogramacionAdmin'
 import ListaEsperaAdmin from './pages/admin/ListaEsperaAdmin'
 import SeguimientoAdmin from './pages/admin/SeguimientoAdmin'
 import HorasMedicasAdmin from './pages/admin/HorasMedicasAdmin'
-import EspecialidadesAdmin from './pages/admin/EspecialidadesAdmin'
 
 // Médico
 import MedicoDashboard from './pages/medico/MedicoDashboard'
 import MisCitas from './pages/medico/MisCitas'
-import HorasMedico from './pages/medico/HorasMedico'
+import ConfirmarCitas from './pages/medico/ConfirmarCitas'
 import ReprogramacionMedico from './pages/medico/ReprogramacionMedico'
 import SeguimientoMedico from './pages/medico/SeguimientoMedico'
 
 // Paciente
-import PacienteDashboard from './pages/paciente/PacienteDashboard'
 import AgendarCita from './pages/paciente/AgendarCita'
 import MisCitasPaciente from './pages/paciente/MisCitasPaciente'
 import ListaEsperaPaciente from './pages/paciente/ListaEsperaPaciente'
@@ -48,7 +47,8 @@ function Unauthorized() {
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <ToastProvider>
+        <BrowserRouter>
         <Routes>
           {/* Pública */}
           <Route path="/login" element={<Login />} />
@@ -63,17 +63,16 @@ export default function App() {
           <Route path="/admin/lista-espera" element={<PrivateRoute roles={['ADMIN']}><ListaEsperaAdmin /></PrivateRoute>} />
           <Route path="/admin/seguimiento" element={<PrivateRoute roles={['ADMIN']}><SeguimientoAdmin /></PrivateRoute>} />
           <Route path="/admin/horas-medicas" element={<PrivateRoute roles={['ADMIN']}><HorasMedicasAdmin /></PrivateRoute>} />
-          <Route path="/admin/especialidades" element={<PrivateRoute roles={['ADMIN']}><EspecialidadesAdmin /></PrivateRoute>} />
 
           {/* MÉDICO */}
           <Route path="/medico" element={<PrivateRoute roles={['MEDICO']}><MedicoDashboard /></PrivateRoute>} />
+          <Route path="/medico/confirmar" element={<PrivateRoute roles={['MEDICO']}><ConfirmarCitas /></PrivateRoute>} />
           <Route path="/medico/mis-citas" element={<PrivateRoute roles={['MEDICO']}><MisCitas /></PrivateRoute>} />
-          <Route path="/medico/horas-medicas" element={<PrivateRoute roles={['MEDICO']}><HorasMedico /></PrivateRoute>} />
           <Route path="/medico/reprogramacion" element={<PrivateRoute roles={['MEDICO']}><ReprogramacionMedico /></PrivateRoute>} />
           <Route path="/medico/seguimiento" element={<PrivateRoute roles={['MEDICO']}><SeguimientoMedico /></PrivateRoute>} />
 
           {/* PACIENTE */}
-          <Route path="/paciente" element={<PrivateRoute roles={['PACIENTE']}><PacienteDashboard /></PrivateRoute>} />
+          <Route path="/paciente" element={<Navigate to="/paciente/mis-citas" replace />} />
           <Route path="/paciente/mis-citas" element={<PrivateRoute roles={['PACIENTE']}><MisCitasPaciente /></PrivateRoute>} />
           <Route path="/paciente/agendar" element={<PrivateRoute roles={['PACIENTE']}><AgendarCita /></PrivateRoute>} />
           <Route path="/paciente/lista-espera" element={<PrivateRoute roles={['PACIENTE']}><ListaEsperaPaciente /></PrivateRoute>} />
@@ -82,7 +81,8 @@ export default function App() {
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
-      </BrowserRouter>
+        </BrowserRouter>
+      </ToastProvider>
     </AuthProvider>
   )
 }

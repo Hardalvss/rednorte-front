@@ -46,7 +46,7 @@ export default function ReprogramacionAdmin() {
   return (
     <Layout>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Reprogramación de Citas</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Reprogramación de Citas</h1>
         <p className="text-gray-500 text-sm mt-1">{citas.length} registros</p>
       </div>
       <div className="card">

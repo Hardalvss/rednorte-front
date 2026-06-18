@@ -16,7 +16,7 @@ export default function Login() {
     setLoading(true)
     try {
       const user = await login(form.email, form.password)
-      const routes = { ADMIN: '/admin', MEDICO: '/medico', PACIENTE: '/paciente' }
+      const routes = { ADMIN: '/admin', MEDICO: '/medico', PACIENTE: '/paciente/mis-citas' }
       navigate(routes[user.rol] || '/login')
     } catch {
       setError('Credenciales incorrectas. Verifica tu email y contraseña.')
@@ -27,25 +27,21 @@ export default function Login() {
 
   return (
     <div
-      className="min-h-screen w-full relative"
+      className="min-h-screen w-full relative flex items-center lg:items-end justify-center lg:justify-start px-4 py-6 lg:px-0 lg:py-0"
       style={{
         backgroundImage: 'url(/login-bg.jpg)',
         backgroundSize: 'cover',
         backgroundPosition: 'center right',
       }}
     >
-      {/* Overlay sutil para profundidad */}
       <div
-        className="absolute inset-0"
-        style={{ background: 'linear-gradient(to right, rgba(4,12,30,0.0) 0%, rgba(4,12,30,0.0) 100%)' }}
+        className="absolute inset-0 lg:hidden"
+        style={{ background: 'linear-gradient(to bottom, rgba(4,12,30,0.55) 0%, rgba(4,12,30,0.75) 100%)' }}
       />
 
-      {/* Card glassmorphism con el formulario */}
       <div
-        className="absolute z-10 w-full max-w-2xl rounded-2xl p-9"
+        className="relative z-10 w-full max-w-md lg:max-w-2xl rounded-2xl p-6 sm:p-8 lg:p-9 lg:mb-[6%] lg:ml-[7%]"
         style={{
-          bottom: '12%',
-          left: '7%',
           background: 'rgba(8, 40, 60, 0.55)',
           backdropFilter: 'blur(18px)',
           WebkitBackdropFilter: 'blur(18px)',
@@ -53,7 +49,7 @@ export default function Login() {
           boxShadow: '0 8px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)',
         }}
       >
-        <h2 className="text-white text-2xl font-bold mb-1">Iniciar Sesión</h2>
+        <h2 className="text-white text-xl sm:text-2xl font-bold mb-1">Iniciar Sesión</h2>
         <p className="text-blue-300 text-sm mb-6 opacity-80">Ingresa tus credenciales para continuar</p>
 
         {error && (

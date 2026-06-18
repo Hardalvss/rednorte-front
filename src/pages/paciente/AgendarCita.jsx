@@ -5,8 +5,9 @@ import {
   getEspecialidades, getUsuarios,
   getHorasDisponibles, agendarCita, crearSeguimiento, registrarEvento, agregarListaEspera
 } from '../../services/api'
+import { liberarListaEspera } from '../../utils/listaEspera'
 import {
-  Stethoscope, User, Clock, CheckCircle, ChevronRight, ChevronLeft, AlertCircle, Search
+  Stethoscope, User, Clock, CheckCircle, ChevronRight, ChevronLeft, AlertCircle, Search, Calendar
 } from 'lucide-react'
 
 const PASOS = ['Especialidad', 'Médico', 'Hora', 'Confirmar']
@@ -20,6 +21,7 @@ export default function AgendarCita() {
   const [espSel, setEspSel] = useState(null)
   const [medicoSel, setMedicoSel] = useState(null)
   const [horaSel, setHoraSel] = useState(null)
+  const [diaSel, setDiaSel] = useState(null)
   const [observaciones, setObservaciones] = useState('')
   const [busqueda, setBusqueda] = useState('')
   const [loading, setLoading] = useState(false)
@@ -44,8 +46,8 @@ export default function AgendarCita() {
 
   const medicosDeEsp = espSel ? medicos.filter(m => espSel.medicoIds?.some(id => Number(id) === Number(m.id))) : []
 
-  const seleccionarEsp = (e) => { setEspSel(e); setMedicoSel(null); setHoraSel(null); setPaso(1) }
-  const seleccionarMedico = (m) => { setMedicoSel(m); setHoraSel(null); setPaso(2) }
+  const seleccionarEsp = (e) => { setEspSel(e); setMedicoSel(null); setHoraSel(null); setDiaSel(null); setPaso(1) }
+  const seleccionarMedico = (m) => { setMedicoSel(m); setHoraSel(null); setDiaSel(null); setPaso(2) }
   const seleccionarHora = (h) => { setHoraSel(h); setPaso(3) }
 
   const confirmar = async () => {
@@ -64,6 +66,7 @@ export default function AgendarCita() {
         rutPaciente: user.rut || 'Sin RUT',
         observaciones,
       })
+      liberarListaEspera(user.id, espSel.nombre).catch(() => {})
       // Crear seguimiento
       try {
         const seg = await crearSeguimiento({
@@ -89,6 +92,7 @@ export default function AgendarCita() {
             especialidad: espSel.nombre,
             prioridad: 'MEDIA',
             observaciones: `Hora solicitada con Dr. ${medicoSel.nombre} ${medicoSel.apellido} el ${new Date(horaSel.fechaHora).toLocaleString('es-CL')} ya no estaba disponible.`,
+            edad: user.edad ?? null,
           })
           setExito('espera')
         } catch {
@@ -112,11 +116,17 @@ export default function AgendarCita() {
       <Layout>
         <div className="max-w-md mx-auto mt-10 card text-center py-12">
           <CheckCircle size={52} className="text-green-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-800 mb-2">¡Cita agendada!</h2>
+          <h2 className="text-xl font-bold text-gray-800 mb-2">¡Solicitud enviada!</h2>
           <p className="text-gray-500 text-sm mb-1">
             <span className="font-medium">{espSel?.nombre}</span> con <span className="font-medium">Dr. {medicoSel?.nombre} {medicoSel?.apellido}</span>
           </p>
           <p className="text-gray-500 text-sm mb-6">{new Date(horaSel?.fechaHora).toLocaleString('es-CL')}</p>
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-3 mb-4 text-left">
+            <p className="text-sm font-semibold text-yellow-800 mb-1">Pendiente de confirmación</p>
+            <p className="text-xs text-yellow-700">
+              Tu cita quedó reservada. Cuando el médico la confirme recibirás una notificación con todos los detalles.
+            </p>
+          </div>
           <p className="text-xs text-blue-600 bg-blue-50 rounded-lg px-4 py-2 mb-6">
             Tu seguimiento médico ha sido iniciado. Puedes verlo en "Mi Seguimiento".
           </p>
@@ -153,7 +163,7 @@ export default function AgendarCita() {
   return (
     <Layout>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Agendar Cita Médica</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Agendar Cita Médica</h1>
         <p className="text-gray-500 text-sm mt-1">Sigue los pasos para reservar tu hora</p>
       </div>
 
@@ -265,36 +275,127 @@ export default function AgendarCita() {
         </div>
       )}
 
-      {paso === 2 && (
-        <div>
-          <div className="flex items-center gap-2 mb-4">
-            <button onClick={() => setPaso(1)} className="text-blue-600 hover:text-blue-800"><ChevronLeft size={20} /></button>
-            <h2 className="text-base font-semibold text-gray-700">Horas disponibles — Dr. {medicoSel?.nombre} {medicoSel?.apellido}</h2>
+      {paso === 2 && (() => {
+        const porDia = {}
+        horas.forEach(h => {
+          const f = new Date(h.fechaHora)
+          const key = `${f.getFullYear()}-${String(f.getMonth() + 1).padStart(2,'0')}-${String(f.getDate()).padStart(2,'0')}`
+          if (!porDia[key]) porDia[key] = { fecha: f, key, horas: [] }
+          porDia[key].horas.push(h)
+        })
+        const diasOrdenados = Object.values(porDia).sort((a, b) => a.fecha - b.fecha)
+        diasOrdenados.forEach(d => d.horas.sort((a, b) => new Date(a.fechaHora) - new Date(b.fechaHora)))
+
+        const diaActual = diaSel ? porDia[diaSel] : null
+
+        return (
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <button onClick={() => setPaso(1)} className="text-blue-600 hover:text-blue-800"><ChevronLeft size={20} /></button>
+              <h2 className="text-base font-semibold text-gray-700">Elige fecha y hora — Dr. {medicoSel?.nombre} {medicoSel?.apellido}</h2>
+            </div>
+
+            {horas.length === 0 ? (
+              <div className="card text-center py-10">
+                <Clock size={36} className="text-gray-200 mx-auto mb-2" />
+                <p className="text-gray-500">No hay horas disponibles para este médico.</p>
+                <button onClick={() => setPaso(1)} className="btn-secondary mt-4">Volver</button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-[260px,1fr] gap-4">
+                <div className="card p-3 max-h-[60vh] overflow-y-auto">
+                  <div className="flex items-center gap-2 px-2 py-2 mb-2 text-gray-700">
+                    <Calendar size={15} className="text-blue-600" />
+                    <h3 className="font-semibold text-sm">Días disponibles</h3>
+                  </div>
+                  <div className="space-y-2">
+                    {diasOrdenados.map(d => {
+                      const sel = diaSel === d.key
+                      const hoy = new Date(); hoy.setHours(0,0,0,0)
+                      const diaCero = new Date(d.fecha); diaCero.setHours(0,0,0,0)
+                      const diff = Math.round((diaCero - hoy) / 86400000)
+                      const etiqueta = diff === 0 ? 'Hoy' : diff === 1 ? 'Mañana' : null
+                      return (
+                        <button
+                          key={d.key}
+                          onClick={() => setDiaSel(d.key)}
+                          className={`w-full text-left p-3 rounded-lg border transition-all flex items-center gap-3 ${
+                            sel
+                              ? 'bg-blue-600 text-white border-blue-600 shadow-md'
+                              : 'bg-white border-gray-200 hover:border-blue-400 hover:bg-blue-50/40 text-gray-700'
+                          }`}
+                        >
+                          <div className={`w-12 shrink-0 rounded-md text-center py-1.5 ${
+                            sel ? 'bg-white/15' : 'bg-gray-50'
+                          }`}>
+                            <p className={`text-[10px] uppercase font-bold ${sel ? 'text-blue-100' : 'text-gray-500'}`}>
+                              {d.fecha.toLocaleDateString('es-CL', { month: 'short' }).replace('.', '')}
+                            </p>
+                            <p className={`text-xl font-bold leading-none ${sel ? 'text-white' : 'text-gray-800'}`}>
+                              {d.fecha.getDate()}
+                            </p>
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className={`text-sm font-semibold capitalize truncate ${sel ? 'text-white' : 'text-gray-800'}`}>
+                              {etiqueta || d.fecha.toLocaleDateString('es-CL', { weekday: 'long' })}
+                            </p>
+                            <p className={`text-[11px] ${sel ? 'text-blue-100' : 'text-gray-500'}`}>
+                              {d.horas.length} {d.horas.length === 1 ? 'hora' : 'horas'} disponible{d.horas.length === 1 ? '' : 's'}
+                            </p>
+                          </div>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                <div className="card p-4 sm:p-5 min-h-[200px]">
+                  {!diaActual ? (
+                    <div className="h-full flex flex-col items-center justify-center text-center py-12">
+                      <Calendar size={40} className="text-gray-200 mb-3" />
+                      <p className="text-gray-500 font-medium">Selecciona un día</p>
+                      <p className="text-gray-400 text-xs mt-1">para ver los horarios disponibles</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="mb-4 pb-3 border-b border-gray-100">
+                        <p className="text-xs uppercase text-gray-500 tracking-wide font-semibold">Horarios para</p>
+                        <p className="text-lg font-bold text-gray-800 capitalize">
+                          {diaActual.fecha.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' })}
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                        {diaActual.horas.map(h => {
+                          const t = new Date(h.fechaHora)
+                          const sel = horaSel?.id === h.id
+                          return (
+                            <button
+                              key={h.id}
+                              onClick={() => seleccionarHora(h)}
+                              className={`py-3 px-2 rounded-lg border-2 transition-all font-semibold text-center ${
+                                sel
+                                  ? 'border-blue-600 bg-blue-600 text-white shadow'
+                                  : 'border-gray-200 bg-white text-gray-700 hover:border-blue-400 hover:bg-blue-50'
+                              }`}
+                            >
+                              <p className="text-base">
+                                {t.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}
+                              </p>
+                              <p className={`text-[10px] mt-0.5 ${sel ? 'text-blue-100' : 'text-gray-400'}`}>
+                                {h.duracionMinutos} min
+                              </p>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
-          {horas.length === 0 ? (
-            <div className="card text-center py-10">
-              <Clock size={36} className="text-gray-200 mx-auto mb-2" />
-              <p className="text-gray-500">No hay horas disponibles para este médico.</p>
-              <button onClick={() => setPaso(1)} className="btn-secondary mt-4">Volver</button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {horas.map(h => (
-                <button key={h.id} onClick={() => seleccionarHora(h)}
-                  className="card text-left hover:border-blue-400 border-2 border-transparent transition-all hover:shadow-md">
-                  <p className="text-xs text-gray-500 mb-1 capitalize">
-                    {new Date(h.fechaHora).toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' })}
-                  </p>
-                  <p className="text-3xl font-bold text-blue-600 mb-1">
-                    {new Date(h.fechaHora).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                  <p className="text-xs text-gray-400 flex items-center gap-1"><Clock size={11} /> {h.duracionMinutos} min</p>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+        )
+      })()}
 
       {paso === 3 && (
         <div className="max-w-md">
@@ -332,8 +433,9 @@ export default function AgendarCita() {
           <button onClick={confirmar} disabled={loading}
             className="w-full btn-primary flex items-center justify-center gap-2 disabled:opacity-60 py-3">
             <CheckCircle size={16} />
-            {loading ? 'Agendando...' : 'Confirmar Cita'}
+            {loading ? 'Enviando solicitud...' : 'Solicitar Cita'}
           </button>
+          <p className="text-xs text-gray-500 text-center mt-2">El médico debe confirmar tu solicitud.</p>
         </div>
       )}
     </Layout>

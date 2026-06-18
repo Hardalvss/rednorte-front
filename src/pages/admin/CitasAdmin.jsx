@@ -10,8 +10,12 @@ export default function CitasAdmin() {
 
   const estadoBadge = (estado) => {
     const cls = {
-      ACTIVA: 'badge-activo', CANCELADA: 'badge-cancelado',
-      PENDIENTE: 'badge-pendiente', REPROGRAMADA: 'badge-reprogramado'
+      PENDIENTE: 'badge-pendiente',
+      CONFIRMADA: 'badge-confirmado',
+      AGENDADA: 'badge-activo',
+      CANCELADA: 'badge-cancelado',
+      REPROGRAMADA: 'badge-reprogramado',
+      ATENDIDA: 'badge-activo'
     }
     return <span className={cls[estado] || 'badge-pendiente'}>{estado}</span>
   }
@@ -29,7 +33,7 @@ export default function CitasAdmin() {
   return (
     <Layout>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Citas Médicas</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Citas Médicas</h1>
         <p className="text-gray-500 text-sm mt-1">{citas.length} citas en el sistema</p>
       </div>
       <div className="card">
